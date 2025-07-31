@@ -84,3 +84,10 @@ footer {
   color: white;
   text-align: center;
 }
+.upload-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
