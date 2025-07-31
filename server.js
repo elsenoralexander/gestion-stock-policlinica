@@ -41,5 +41,19 @@ app.post('/api/items/:id/move', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
-
+// Endpoint para crear o actualizar artículos desde Frontend
+app.post('/api/items', async (req, res) => {
+  try {
+    const { nfcCode, name, reference, quantity } = req.body;
+    const item = await Item.findOneAndUpdate(
+      { nfcCode },
+      { name, reference, quantity },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, item });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
 app.listen(PORT, () => console.log(`Servidor escuchando en puerto ${PORT}`));
