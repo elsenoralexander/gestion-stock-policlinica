@@ -75,3 +75,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Carga Excel sin backend adicional
+const uploadForm = document.getElementById('uploadForm');
+uploadForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) return alert('Selecciona un archivo .xlsx');
+
+  // Leer el archivo con SheetJS
+  const data = await fileInput.files[0].arrayBuffer();
+  const workbook = XLSX.read(data, { type: 'array' });
+  const sheet = workbook.SheetNames[0];
+  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+  // Para cada fila, llamar al endpoint de creación/upsert
+  for (const row of rows) {
+    const nfcCode = row['NFC']?.toString();
+    const name = row['Nombre'];
+    const reference = row['Referencia'];
+    const quantity = parseInt(row['Cantidad'], 10) || 0;
+    if (!nfcCode || !name) continue;
+
+    // Upsert via fetch
+    await fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nfcCode, name, reference, quantity })
+    });
+  }
+  alert('Importación completada');
+
+  // Opcional: recarga la página
+  location.reload();
+});
